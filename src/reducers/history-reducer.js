@@ -1,4 +1,4 @@
-export default (state = [{   squares: Array(9).fill(null), }], action) => {
+export default (state = [{squares: Array(9).fill(null),}], action) => {
   const { history, id } = action;
   switch (action.type) {
   case 'ADD_HISTORY':

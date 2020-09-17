@@ -2,12 +2,14 @@ import React from 'react';
 import Board from './Board';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 
 class Game extends React.Component {
   constructor(props){
     super(props);
     this.state = {
+      // history : [{
+      //   squares: Array(9).fill(null),
+      // }],
       stepNumber: 0,
       xIsNext: true,
     };
@@ -34,20 +36,32 @@ class Game extends React.Component {
   }
 
   handleClick(i) {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    // const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const history = this.props.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]){
+    if (this.calculateWinner(squares) || squares[i]){
       return;
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O';
       this.setState({
-      history: history.concat([{
-        squares: squares,
-      }]),
+      // history: history.concat([{
+      //   squares: squares,
+      // }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
     });
+
+    const { dispatch } = this.props;
+    const action = {
+      type: "ADD_HISTORY",
+      history: {
+        squares: squares
+      },
+      id: this.state.history.length + 1
+      }
+
+    dispatch(action);
   }
 
   jumpTo(step) {
@@ -58,9 +72,11 @@ class Game extends React.Component {
   }
 
   render() {
-    const history = this.state.history;
+    console.log(this.props.history);
+    const history = this.props.history;
+    console.log(history);
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const winner = this.calculateWinner(current.squares);
     const tie = "Please work!";
 
     const moves = history.map((step, move) => {
@@ -84,17 +100,19 @@ class Game extends React.Component {
     }
 
     return (
-      <div className="game">
-        <div className="game-board">
-          <Board 
-            squares={current.squares}
-            onClick={(i) => this.handleClick(i)} />
+      <React.Fragment>
+        <div className="game">
+          <div className="game-board">
+            <Board 
+              squares={current.squares}
+              onClick={(i) => this.handleClick(i)} />
+          </div>
+          <div className="game-info">
+            <div>{status}</div>
+            <ol>{moves}</ol>
+          </div>
         </div>
-        <div className="game-info">
-          <div>{status}</div>
-          <ol>{moves}</ol>
-        </div>
-      </div>
+      </React.Fragment>
     );
   }
 }
@@ -105,7 +123,7 @@ Game.propTypes = {
 
 const mapStateToProps = state => {
   return {
-    history: state.history
+    history: state
   }
 }
 
